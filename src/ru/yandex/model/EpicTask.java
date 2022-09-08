@@ -1,68 +1,44 @@
 package ru.yandex.model;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class EpicTask extends Task {
 
-    public ArrayList<SubTask> getSubTasks() {
-        return subTasks;
+    private ArrayList<Integer> subTasksID;
+
+    public ArrayList<Integer> getSubTasksID() {
+        return subTasksID;
+    }
+    public void removeSubtuskID(Integer subTaskId){
+        subTasksID.remove(subTaskId);
     }
 
-    private ArrayList<SubTask> subTasks;
+    public EpicTask(String name, String description, TypeTask typeTask) {
 
-    public EpicTask(String name, String description, ArrayList<SubTask> subTasks, TypeTask typeTask) {
-        this.subTasks = subTasks;
         this.name = name;
         this.description = description;
         this.typeTask = typeTask;
-        changeStatus();
+        subTasksID = new ArrayList<>();
     }
 
-    public void changeStatus() {
-        Status status;
-        if (subTasks.size() == 0) {
-            this.status = Status.NEW;
-            return;
-        }
-        boolean isDone = false;
-        boolean isInProgress = false;
-        boolean isNew = false;
-        for (SubTask subTask : subTasks) {
-            switch (subTask.getStatus()) {
-                case NEW:
-                    isNew = true;
-                    break;
-                case DONE:
-                    isDone = true;
-                    break;
-                case INPROGRESS:
-                    isInProgress = true;
-                    break;
-            }
-        }
-        if (isNew && !isDone && !isInProgress) {
-            this.status = Status.NEW;
-        } else if (!isNew && isDone && !isInProgress) {
-            this.status = Status.DONE;
-        } else this.status = Status.INPROGRESS;
+    public  void addSubTaskId (int subTaskId)
+    {
+        subTasksID.add(subTaskId);
     }
-
+    public void clearAllSubTasksId(){
+        subTasksID.clear();
+    }
     @Override
     public String toString() {
-        String substring = "";
-        for (int i = 0; i < subTasks.size(); i++) {
-            substring += "\t";
-            substring += subTasks.get(i).toString();
-            if (i != subTasks.size() - 1) {
-                substring += ",\n";
-            } else substring += "\n\t]\n}";
-        }
+
         return "EpicTask{\n" +
                 "\tName='" + name + '\'' +
                 ", ID=" + id +
                 ", Description='" + description + '\'' +
                 ", Status=" + status +
-                ",\nSubTasks=[\n" + substring;
+                ",\n\tSubTasks=" + subTasksID.toString()
+                +"\n}";
     }
 }
 

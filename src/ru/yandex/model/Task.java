@@ -6,18 +6,18 @@ import java.util.ArrayList;
 
 public class Task {
     protected String name;
-
-
     protected int id;
     protected String description;
     protected Status status;
+    protected TypeTask typeTask;
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
 
     public TypeTask getTypeTask() {
         return typeTask;
     }
-
-    protected TypeTask typeTask;
-
 
     @Override
     public String toString() {

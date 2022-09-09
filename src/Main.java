@@ -105,6 +105,7 @@ public class Main {
         System.out.println("Удалили ЭПИК ипотеки?" + manager.deleteByIdAndTypeTask(3,TypeTask.EPICTASK));
         System.out.println("Смотрим сабтаски");
         System.out.println(manager.getTasksByType(TypeTask.SUBTASK));
+        System.out.println("Конец");
 
     }
 }

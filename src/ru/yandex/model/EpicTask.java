@@ -13,6 +13,9 @@ public class EpicTask extends Task {
     public void removeSubTaskId(Integer subTaskId) {
         subTasksID.remove(subTaskId);
     }
+    public void setStatus(Status status) {
+        this.status = status;
+    }
 
     public EpicTask(String name, String description, TypeTask typeTask) {
         this.name = name;

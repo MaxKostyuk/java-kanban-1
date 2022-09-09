@@ -19,8 +19,6 @@ public class Manager {
         id = 0;
     }
 
-
-
     /**
      * Основные методы бизнес-логики
      */
@@ -179,10 +177,6 @@ public class Manager {
         }
         return false;
     }
-
-
-
-
 
     /** Дополнительные методы бизнес логики */
     public ArrayList<SubTask> getListSubtask(int id) {

@@ -1,7 +1,6 @@
 package ru.yandex.model;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class EpicTask extends Task {
 
@@ -10,25 +9,26 @@ public class EpicTask extends Task {
     public ArrayList<Integer> getSubTasksID() {
         return subTasksID;
     }
-    public void removeSubtuskID(Integer subTaskId){
+
+    public void removeSubTaskId(Integer subTaskId) {
         subTasksID.remove(subTaskId);
     }
 
     public EpicTask(String name, String description, TypeTask typeTask) {
-
         this.name = name;
         this.description = description;
         this.typeTask = typeTask;
         subTasksID = new ArrayList<>();
     }
 
-    public  void addSubTaskId (int subTaskId)
-    {
+    public void addSubTaskId(int subTaskId) {
         subTasksID.add(subTaskId);
     }
-    public void clearAllSubTasksId(){
+
+    public void clearAllSubTasksId() {
         subTasksID.clear();
     }
+
     @Override
     public String toString() {
 
@@ -38,7 +38,7 @@ public class EpicTask extends Task {
                 ", Description='" + description + '\'' +
                 ", Status=" + status +
                 ",\n\tSubTasks=" + subTasksID.toString()
-                +"\n}";
+                + "\n}";
     }
 }
 

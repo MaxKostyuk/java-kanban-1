@@ -1,19 +1,14 @@
 package ru.yandex.presenter;
 
 import ru.yandex.model.*;
-
-import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-//Вопрос : надо ли реализовать методы по работе с задачами только по айди без типа таски?
-//это как бы не трудно просто в таком случае надо бегать по всем мапам. что как бы медленно.
 public class Manager {
     private final HashMap<Integer, Task> tasks;
-
     private final HashMap<Integer, SubTask> subTasks;
-
     private final HashMap<Integer, EpicTask> epicTasks;
     int id;
 
@@ -25,24 +20,29 @@ public class Manager {
     }
 
 
-    ////////////////ОСНОВНЫЕ МЕТОДЫ////////////////////////////////
-    public AbstractMap<Integer, ? extends Task> getTasksByType(TypeTask typeTask) {
+
+    /**
+     * Основные методы бизнес-логики
+     */
+    public Collection<? extends Task> getTasksByType(TypeTask typeTask) {
+        Collection<? extends Task> tempListTasks;
         switch (typeTask) {
             case TASK: {
                 if (!tasks.isEmpty()) {
-                    return tasks;
+                    tempListTasks = tasks.values();
+                    return tempListTasks;
                 } else return null;
             }
             case SUBTASK: {
-
                 if (!subTasks.isEmpty()) {
-                    return subTasks;
+                    tempListTasks = subTasks.values();
+                    return tempListTasks;
                 } else return null;
             }
             case EPICTASK: {
-
                 if (!epicTasks.isEmpty()) {
-                    return epicTasks;
+                    tempListTasks = epicTasks.values();
+                    return tempListTasks;
                 } else return null;
             }
         }
@@ -60,11 +60,10 @@ public class Manager {
             case SUBTASK: {
                 if (!subTasks.isEmpty()) {
                     subTasks.clear();
-
-                  //   вызов апдейт эпиков
-                    for(Map.Entry<Integer,EpicTask> epicTask : epicTasks.entrySet()){
+                    /**Вызов обновления эпиков*/
+                    for (Map.Entry<Integer, EpicTask> epicTask : epicTasks.entrySet()) {
                         epicTask.getValue().clearAllSubTasksId();
-                        updateTask(epicTask.getKey(),epicTask.getValue());
+                        updateTask(epicTask.getKey(), epicTask.getValue());
                     }
                     return true;
                 } else return false;
@@ -72,7 +71,6 @@ public class Manager {
             case EPICTASK: {
                 if (!epicTasks.isEmpty()) {
                     epicTasks.clear();
-                    //надо ли удалять сабтаски, так как подзадачи без эпика существовать по идее не должны?
                     subTasks.clear();
                     return true;
                 } else return false;
@@ -81,7 +79,7 @@ public class Manager {
         return false;
     }
 
-    public Task getById(int id, TypeTask typeTask) {
+    public Task getByIdAndTypeTask(int id, TypeTask typeTask) {
         switch (typeTask) {
             case TASK: {
                 boolean containsId = tasks.containsKey(id);
@@ -105,24 +103,22 @@ public class Manager {
         return null;
     }
 
-    public int createTaskAndReturnID(Task task) {
-        int keyID = id;
-        task.setId(keyID);
-
+    public int createTaskAndReturnId(Task task) {
+        int keyId = getNextId();
+        task.setId(keyId);
         if (task instanceof SubTask) {
-            this.subTasks.put(keyID, (SubTask) task);
-            int epicIdOfSubtask = subTasks.get(keyID).getEpicId();
-            epicTasks.get(epicIdOfSubtask).addSubTaskId(keyID);
+            this.subTasks.put(keyId, (SubTask) task);
+            int epicIdOfSubtask = subTasks.get(keyId).getEpicId();
+            epicTasks.get(epicIdOfSubtask).addSubTaskId(keyId);
             changeStatus(epicIdOfSubtask);
         }
         else if (task instanceof EpicTask) {
-            this.epicTasks.put(keyID, (EpicTask) task);
-            changeStatus(keyID);
+            this.epicTasks.put(keyId, (EpicTask) task);
+            changeStatus(keyId);
         }
-        else this.tasks.put(keyID, task);
-
-        id++;
-        return keyID;
+        else
+            this.tasks.put(keyId, task);
+        return keyId;
     }
 
     public void updateTask(int id, Task task) {
@@ -133,14 +129,11 @@ public class Manager {
             changeStatus(epicIdOfSubtask);
         }
         if (task instanceof EpicTask) {
-
-            for(Map.Entry<Integer,SubTask> subTask : subTasks.entrySet()) {
+            for (Map.Entry<Integer, SubTask> subTask : subTasks.entrySet()) {
                 int epicIdOfSubtask = subTask.getValue().getEpicId();
-                if(epicIdOfSubtask == id);
-                {
+                if (epicIdOfSubtask == id) {
                     ((EpicTask) task).addSubTaskId(epicIdOfSubtask);
                 }
-
             }
             this.epicTasks.put(id, (EpicTask) task);
             changeStatus(id);
@@ -149,7 +142,7 @@ public class Manager {
 
     }
 
-    public boolean deleteByIdAndTypeTask(int id, TypeTask typeTask) {
+    public boolean deleteByIdAndTypeTask(Integer id, TypeTask typeTask) {
         switch (typeTask) {
             case TASK: {
                 boolean containsId = tasks.containsKey(id);
@@ -163,8 +156,8 @@ public class Manager {
                 if (containsId) {
                     int epicIdOfSubTask = subTasks.get(id).getEpicId();
                     subTasks.remove(id);
-                    //удаление айди сабтаска из этого эпика
-                    epicTasks.get(epicIdOfSubTask).removeSubtuskID(id);
+                    /**Удаление ID SubTask из EpicTask*/
+                    epicTasks.get(epicIdOfSubTask).removeSubTaskId(id);
                     changeStatus(epicIdOfSubTask);
                     return true;
                 } else return false;
@@ -172,13 +165,12 @@ public class Manager {
             case EPICTASK: {
                 boolean containsId = epicTasks.containsKey(id);
                 if (containsId) {
-                    epicTasks.remove(id);
-                  //Удаление сабтасков
-                    for(Map.Entry<Integer,SubTask> subTask: subTasks.entrySet()) {
-                        int epicIdOfSubTask = subTask.getValue().getEpicId();
-                        if(epicIdOfSubTask == id) {
-                            int subTaskId = subTask.getKey();
-                            subTasks.remove(subTaskId);
+                    EpicTask deletedEpicTask = epicTasks.remove(id);
+                    /**Удаление сабтасков в связи удаления эпика*/
+                    ArrayList <Integer> tempListId = deletedEpicTask.getSubTasksID();
+                    for (Integer subTaskIdFromEpic : tempListId) {
+                        if (subTasks.containsKey(subTaskIdFromEpic)) {
+                            subTasks.remove(subTaskIdFromEpic);
                         }
                     }
                     return true;
@@ -189,38 +181,38 @@ public class Manager {
     }
 
 
-    //////////////////ДОПМЕТОДЫ//////////////////////////////////
+
+
+
+    /** Дополнительные методы бизнес логики */
     public ArrayList<SubTask> getListSubtask(int id) {
         boolean containsId = epicTasks.containsKey(id);
-        ArrayList <Integer> subTasksId;
-        if(containsId){
+        ArrayList<Integer> subTasksId;
+        if (containsId) {
             subTasksId = epicTasks.get(id).getSubTasksID();
-        }
-        else return null;
-        ArrayList <SubTask> subTaskArrayList = new ArrayList<>();
-        for(Integer Id : subTasksId){
+        } else return null;
+        ArrayList<SubTask> subTaskArrayList = new ArrayList<>();
+        for (Integer Id : subTasksId) {
             subTaskArrayList.add(subTasks.get(Id));
         }
         return subTaskArrayList;
     }
-
+ /** Метод отвечающий за состояние EpicTask*/
     public void changeStatus(int epicId) {
-        Status status;
-        ArrayList <SubTask> tempListSubtasks = new ArrayList<>();
-        for(Map.Entry<Integer,SubTask> subTask : subTasks.entrySet()){
-                int epicIdOfSubtask = subTask.getValue().getEpicId();
-                if(epicId == epicIdOfSubtask){
-                    tempListSubtasks.add(subTask.getValue());
-                }
+        ArrayList<SubTask> listSubtasks = new ArrayList<>();
+        EpicTask tempEpicTask = ((EpicTask)getByIdAndTypeTask(epicId,TypeTask.EPICTASK));
+        ArrayList<Integer> listId = tempEpicTask.getSubTasksID();
+        for (Integer uid : listId) {
+            listSubtasks.add(subTasks.get(uid));
         }
-        if (tempListSubtasks.size() == 0) {
+        if (listSubtasks.size() == 0) {
             epicTasks.get(epicId).setStatus(Status.NEW);
             return;
         }
         boolean isDone = false;
         boolean isInProgress = false;
         boolean isNew = false;
-        for (SubTask subTask : tempListSubtasks) {
+        for (SubTask subTask : listSubtasks) {
             switch (subTask.getStatus()) {
                 case NEW:
                     isNew = true;
@@ -235,11 +227,22 @@ public class Manager {
         }
         if (isNew && !isDone && !isInProgress) {
             epicTasks.get(epicId).setStatus(Status.NEW);
-        } else if (!isNew && isDone && !isInProgress) {
+        }
+        else if (!isNew && isDone && !isInProgress) {
             epicTasks.get(epicId).setStatus(Status.DONE);
-        } else epicTasks.get(epicId).setStatus(Status.INPROGRESS);
+        }
+        else
+            epicTasks.get(epicId).setStatus(Status.INPROGRESS);
+    }
+
+    /** Метод для генерации ID*/
+    private int getNextId() {
+        int keyId = id;
+        ++id;
+        return keyId;
     }
 }
+
 
 
 

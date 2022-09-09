@@ -11,12 +11,11 @@ public class Task {
     protected Status status;
     protected TypeTask typeTask;
 
-    public void setStatus(Status status) {
-        this.status = status;
+    public Task() {
     }
 
-    public TypeTask getTypeTask() {
-        return typeTask;
+    public void setStatus(Status status) {
+        this.status = status;
     }
 
     @Override
@@ -34,9 +33,6 @@ public class Task {
         this.description = description;
         this.status = status;
         this.typeTask = typeTask;
-    }
-
-    public Task() {
     }
 
     public Status getStatus() {
